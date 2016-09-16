@@ -1,0 +1,22 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "cicd demo lambda function",
+  "Resources": {
+      "HelloLambdaPythonFunction":{
+        "Type" : "AWS::Lambda::Function",
+            "Properties" : {
+              "Code" : {
+                "S3Bucket": "haakjan",
+                "S3Key": "function.zip"
+                },
+              "Description" : "Hello Lambda Function",
+              "FunctionName" : "hello_there",
+              "Handler" : "hello.lambda_handler",
+              "MemorySize" : 128,
+              "Role" : "arn:aws:iam::750651121503:role/service-role/lambdaRole",
+              "Runtime" : "python2.7",
+              "Timeout" : 30
+            }
+        }
+    }
+}
