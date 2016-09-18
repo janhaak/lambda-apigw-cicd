@@ -1,9 +1,6 @@
 import boto3
 import time
 
-#make it work in Jenkins
-sys.path.append(os.environ['WORKSPACE'])
-
 #now that the tests have passed on the dev alias,
 #change the prod alias to be the same value as the dev alias
 func = "hello_there"
