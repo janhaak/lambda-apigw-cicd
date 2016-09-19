@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AWS API Gateway + Lambda Continuous Delivery</title>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="./img/favicon.ico">
+
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="./js/for_cognito_lib/jsbn.js"></script>
+    <script src="./js/for_cognito_lib/jsbn2.js"></script>
+    <script src="./js/for_cognito_lib/sjcl.js"></script>
+    <script src="./js/for_cognito_lib/moment.js"></script>
+    <script src="./js/awssdk/aws-cognito-sdk.js"></script>
+    <script src="./js/awssdk/amazon-cognito-identity.min.js"></script>
+    <script src="./js/awssdk/aws-sdk.2.5.5.js"></script>
+
+    <script src="./js/handson-config.js"></script>
+    <script src="./js/handson-utils.js"></script>
+    <script src="./js/deliverable1.js"></script>
+
+    <link rel="stylesheet" href="./styles/bootstrap.min.css">
+    <link rel="stylesheet" href="./styles/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="./styles/base.css">
+</head>
+
+<body class="bg-primary">
+    <header class="text-center">
+        <h1>Continuous Delivery Demo</h1>
+        <p>API Gateway and Lambda</p>
+    </header>
+
+    <ul class="text-muted">
+        <li class="list-group-item">
+
+            <section id="test">
+                <h2>Test</h2>
+
+                <form>
+                    <h3>Call public API</h3>
+                    <div class="indent1">
+                        <div class="form-group">
+                            <label for="public-get-code">Code:</label>
+                            <textarea id="public-get-code" class="form-control" readonly></textarea>
+                            <script>
+                                updateTextArea($('#public-get-code'), publicAPICaller().code);
+                            </script>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="public-submit" class="btn btn-info pull">Run</button>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="public-response" class="form-control" placeholder="-" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <script>
+                        $(document).ready(function($){
+                            $("#public-submit").click(function(ev) {
+                                publicAPICaller().call(function(res) {
+                                    updateTextArea($("#public-response"), res);
+                                });
+                            });
+                        });
+                    </script>
+                </form>
+
+
+                <!--form>
+                    <h3>Call private API - Auth with User Pools</h3>
+                    <div class="indent1">
+                        <div class="form-group">
+                            <label for="private-get-userpools-code">Code:</label>
+                            <textarea id="private-get-userpools-code" class="form-control" rows="12" readonly></textarea>
+                            <script>
+                                updateTextArea($('#private-get-userpools-code'), privateAPICaller_UserPools().code);
+                            </script>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="private-submit-userpools" class="btn btn-info pull">Run</button>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="private-response-userpools" class="form-control"  placeholder="-" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <script>
+                        $(document).ready(function($){
+                            $("#private-submit-userpools").click(function(ev) {
+                                privateAPICaller_UserPools().call(function(res) {
+                                    updateTextArea($("#private-response-userpools"), res);
+                                });
+                            });
+                        });
+                    </script>
+                </form-->
+
+            </section>
+        </li>
+    </ul>
+
+    <footer class="text-right">
+        <p>Powered by
+            <a href="https://aws.amazon.com/" target="blank"><img src="./img/aws-logo.png" style="height: 1.9em;"></a>
+        </p>
+    </footer>
+
+</body>
+
+</html>

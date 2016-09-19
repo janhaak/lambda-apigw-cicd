@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Page</title>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="./img/favicon.ico">
+
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="./js/for_cognito_lib/jsbn.js"></script>
+    <script src="./js/for_cognito_lib/jsbn2.js"></script>
+    <script src="./js/for_cognito_lib/sjcl.js"></script>
+    <script src="./js/for_cognito_lib/moment.js"></script>
+    <script src="./js/awssdk/aws-cognito-sdk.js"></script>
+    <script src="./js/awssdk/amazon-cognito-identity.min.js"></script>
+    <script src="./js/awssdk/aws-sdk.2.5.5.js"></script>
+
+    <script src="./js/handson-config.js"></script>
+    <script src="./js/handson-utils.js"></script>
+    <script src="./js/deliverable1.js"></script>
+
+    <link rel="stylesheet" href="./styles/bootstrap.min.css">
+    <link rel="stylesheet" href="./styles/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="./styles/base.css">
+</head>
+
+<body class="bg-primary">
+    <header class="text-center">
+        <h1>My Page</h1>
+        <p>Amazon Cognito User Pools + Amazon API Gateway</p>
+    </header>
+
+    <ul class="text-muted">
+        <li class="list-group-item">
+            <section>
+                <h2>Sign-out</h2>
+                <form id="sign-out">
+                    <div class="form-group">
+                        <button type="submit" id="sign-out-submit" class="btn btn-info">currentCognitoUser.signOut();</button>
+                    </div>
+                </form>
+
+                <script>
+                    $(document).ready(function($){ 
+                        $("#sign-out").submit(function(event){
+                            lockForm($("#sign-out"), true);
+                            event.preventDefault(); 
+                            SignInStatus.currentCognitoUser.signOut();
+                            if (AWS.config.credentials) {
+                                AWS.config.credentials.clearCachedId();
+                            }
+                            $(location).attr('href', 'index.html'); 
+                        });
+                    });
+                </script>
+            </section>
+        </li>
+
+        <li class="list-group-item">
+            <section>
+                <h2>About current user</h2>
+                <div class="indent1">
+                    <h3>How to get current CognitoUser</h3>
+                    <div class="examples">
+                        <pre id="get-current-user-code">
+var UserPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool({ 
+    UserPoolId: UserPoolId,
+    ClientId: AppClientId 
+});
+
+var currentCognitoUser = UserPool.getCurrentUser();</pre>
+                    </div>
+
+                    <h3>Reference username(email)</h3>
+                    <div class="examples">
+                        <label for="user-email-code">Code:</label>
+                        <pre id="user-email-code">
+currentCognitoUser.getUsername();</pre>
+                    </div>
+                    <div class="examples">
+                        <label for="user-email-value">Value:</label>
+                        <pre id="user-email-value"></pre>
+                        <script>
+                            $('#user-email-value').text(SignInStatus.currentCognitoUser.getUsername());
+                        </script>
+                    </div>
+
+                    <h3>Identity Token</h3>
+                    <div class="examples">
+                        <label for="id-token-code">Code:</label>
+                        <pre id="id-token-code">
+currentCognitoUser.getSession(function(err, session){
+    session.getIdToken().getJwtToken();
+});</pre>
+                    </div>
+                    <div class="examples">
+                        <label for="id-token">Value:</label>
+                        <textarea id="id-token" class="form-control" rows="14" readonly></textarea>
+                    </div>
+                    <script>
+                        $('#id-token').val(SignInStatus.lastIdentityToken);
+                    </script>
+
+                    <h3>ID Token Expiration</h3>
+                    <div class="examples">
+                        <label for="idtoken-expiration-code">Code:</label>
+                        <pre id="idtoken-expiration-code">
+currentCognitoUser.getSession(function(err, session){
+    session.getIdToken().getExpiration();
+});</pre>
+                    </div>
+                    <div class="examples">
+                        <label for="idtoken-expiration-value">Value:</label>
+                        <pre id="idtoken-expiration-value"></pre>
+                        <script>
+                            SignInStatus.currentCognitoUser.getSession(function(err, session){
+                                var expiresAt = session.getIdToken().getExpiration()
+                                var left = expiresAt - Math.round(new Date().getTime()/1000)
+                                $('#idtoken-expiration-value').text(
+                                    `${expiresAt} (${left} seconds left)`
+                                );
+                            });
+                        </script>
+                    </div>
+
+                    <h3>Access Token</h3>
+                    <div class="examples">
+                        <label for="access-token-code">Code:</label>
+                        <pre id="access-token-code">
+currentCognitoUser.getSession(function(err, session){
+    session.getAccessToken().getJwtToken();
+});</pre>
+                    </div>
+                    <div class="examples">
+                        <label for="access-token">Value:</label>
+                        <textarea id="access-token" class="form-control" rows="14" readonly></textarea>
+                    </div>
+                    <script>
+                        $('#access-token').val(SignInStatus.lastAccessToken);
+                    </script>
+
+                </div>
+            </section>
+        </li>
+
+        <li class="list-group-item">
+            <section id="test">
+                <h2>Test</h2>
+
+                <form>
+                    <h3>Call public API</h3>
+                    <div class="indent1">
+                        <div class="form-group">
+                            <label for="public-get-code">Code:</label>
+                            <textarea id="public-get-code" class="form-control" rows="9" readonly></textarea>
+                            <script>
+                                updateTextArea($('#public-get-code'), publicAPICaller().code);
+                            </script>
+                        </div>                    
+                        <div class="form-group">
+                            <button type="button" id="public-submit" class="btn btn-info pull">Run</button>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="public-response" class="form-control" placeholder="-" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <script>
+                        $(document).ready(function($){
+                            $("#public-submit").click(function(ev) {
+                                publicAPICaller().call(function(res) {
+                                    updateTextArea($("#public-response"), res);
+                                });
+                            });
+                        });
+                    </script>
+                </form>
+
+
+                <form>
+                    <h3>Call private API - Auth with User Pools</h3>
+                    <div class="indent1">
+                        <div class="form-group">
+                            <label for="private-get-userpools-code">Code:</label>
+                            <textarea id="private-get-userpools-code" class="form-control" rows="12" readonly></textarea>
+                            <script>
+                                updateTextArea($('#private-get-userpools-code'), privateAPICaller_UserPools().code);
+                            </script>
+                        </div>                    
+                        <div class="form-group">
+                            <button type="button" id="private-submit-userpools" class="btn btn-info pull">Run</button>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="private-response-userpools" class="form-control" placeholder="-" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <script>
+                        $(document).ready(function($){
+                            $("#private-submit-userpools").click(function(ev) {
+                                privateAPICaller_UserPools().call(function(res) {
+                                    updateTextArea($("#private-response-userpools"), res);
+                                });
+                            });
+                        });
+                    </script>
+                </form>
+            </section>
+        </li>
+
+    </ul>
+
+    <footer class="text-right">
+        <p>Powered by
+            <a href="https://aws.amazon.com/" target="blank"><img src="./img/aws-logo.png" style="height: 1.9em;"></a>
+        </p>
+    </footer>
+
+</body>
+
+</html>
