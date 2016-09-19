@@ -12,7 +12,7 @@ var publicAPICaller = function() {
         $.ajax({
             type: "POST",
             url: endpoint,
-            //data: postData,
+            data: JSON.stringify(postData),
             contentType: "application/json",
             complete: function(xhr, status) {
                 console.log("Response: ")
@@ -20,7 +20,7 @@ var publicAPICaller = function() {
                 var responseSummary = "Response status code: " + xhr.status + "\n" +
                                         "Response status text: " + xhr.statusText + "\n" +
                                         "(" + AWS.util.date.iso8601(new Date) + ")" + "\n" +
-                                        xhr;
+                                        JSON.stringify(xhr.responseJSON);
                 callback(responseSummary);
             }
         });
